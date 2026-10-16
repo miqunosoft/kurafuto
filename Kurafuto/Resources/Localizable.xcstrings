@@ -1674,6 +1674,28 @@
         }
       }
     },
+    "Backing up…" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wird gesichert …"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "バックアップ中…"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在备份…"
+          }
+        }
+      }
+    },
     "Backup" : {
       "localizations" : {
         "de" : {
@@ -1714,6 +1736,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "备份已开始"
+          }
+        }
+      }
+    },
+    "Backup failed" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Backup fehlgeschlagen"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "バックアップに失敗しました"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "备份失败"
+          }
+        }
+      }
+    },
+    "Backup finished" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Backup abgeschlossen"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "バックアップが完了しました"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "备份已完成"
           }
         }
       }
@@ -3480,6 +3546,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "检测崩溃并重启"
+          }
+        }
+      }
+    },
+    "Did not start" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nicht gestartet"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "起動しませんでした"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未能启动"
           }
         }
       }
@@ -6102,6 +6190,28 @@
         }
       }
     },
+    "Open Kurafuto to update" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zum Aktualisieren Kurafuto öffnen"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kurafutoを開くと更新されます"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "打开 Kurafuto 以更新"
+          }
+        }
+      }
+    },
     "Open Web Panel" : {
       "localizations" : {
         "de" : {
@@ -6798,6 +6908,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "阅读 EULA"
+          }
+        }
+      }
+    },
+    "Ready for players" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bereit für Spieler"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "プレイヤーが参加できます"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "玩家可以加入了"
           }
         }
       }

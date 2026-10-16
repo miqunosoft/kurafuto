@@ -1,6 +1,6 @@
 # Threat model
 
-- Last reviewed: 2026-10-15 (0.4 widgets, Siri and Shortcuts)
+- Last reviewed: 2026-10-16 (1.0 Live Activities)
 - Update this document in the same pull request whenever a trust boundary, data category, network peer or stored secret changes.
 
 ## System today
@@ -38,6 +38,7 @@ An iOS app with no backend. The user adds one or more Crafty Controller panels (
 | B6 | Visitors ⇄ website getkurafuto.app (GitHub Pages) | Active |
 | B7 | App ⇄ widget extension (App Group container) and links into the app (`kurafuto://`) | Active |
 | B8 | Siri, Shortcuts and automations ⇄ app actions (App Intents) | Active |
+| B9 | App ⇄ Live Activities on the Lock Screen, Dynamic Island, StandBy and a paired Apple Watch (ActivityKit) | Active |
 
 ## Threats and mitigations
 
@@ -57,6 +58,8 @@ An iOS app with no backend. The user adds one or more Crafty Controller panels (
 | App-switcher snapshot leaks panel data | B4 | Privacy cover whenever the scene is not active | Implemented |
 | Widgets expose panel data or credentials | B3, B4, B7 | The extension has no token and no network access to the panel; it reads only `WidgetSnapshot` (panel name, server names, status, versions, player counts, up to eight player names, CPU/RAM of the last hour, newest backup time, theme), never addresses, usernames, console output or files. Player names are shown only on Home Screen widgets and are always privacy-sensitive; Lock Screen widgets show counts. The file lives in the App Group container with `completeUntilFirstUserAuthentication` protection and is deleted on sign-out and panel switch. With the app lock on, all widget content is privacy-sensitive and hidden on a locked device (ADR 0009) | Implemented |
 | Server stopped by voice, automation or someone holding the unlocked phone | B4, B8 | App Intents need an unlocked device; Stop asks for confirmation and, with the app lock on, brings the app to the front for its lock screen and a fresh Face ID or passcode check, and fails rather than skipping it (iOS refuses Face ID in the background). Only start, stop and player count exist; no kill, delete or restore (ADR 0010) | Implemented |
+| Live Activities expose servers or need a push relay | B1, B4, B9 | Only the running app updates them through ActivityKit; no push token is requested, so there is no APNs relay and no new network peer. They carry the server id and name, start time, theme, phase and backup progress – never the panel address, username, token, console output or file names. With the app lock on, the server name is left out. Tapping one opens the same `kurafuto://server/<id>` links as widgets. Signing out and switching panels end them; a stale activity says it is no longer updating instead of showing old values as current (ADR 0011) | Implemented |
+| Backup progress from a hostile panel | B2, B9 | `backup_status` events are decoded strictly (percent clamped to 0–100, other fields ignored); the config id from the event is checked against the panel's id pattern before it goes into a URL; the failure message is never shown | Implemented |
 | Token exposure through Siri or Shortcuts | B8 | Intents run in the app process with its own client; iOS receives only server ids, names and dialog text, never the token or panel address | Implemented |
 | Hostile `kurafuto://` link from another app or website | B7 | Only `kurafuto://server/<id>` with a letters/digits/`-` id, optionally followed by `/console` or `/details`, is accepted; the app opens that server only if the active panel lists it and never runs an action from a link (opening the console sends nothing) | Implemented |
 | Accidental destructive action | B4 | Confirmation dialogs for stop, kill, restore and delete; typed name to delete a server | Implemented |

@@ -167,7 +167,9 @@ struct DashboardView: View {
                                     message: String(localized: "Connected players will be disconnected."),
                                     buttonLabel: action.label) { await model.perform(action, on: server) }
         } else {
-            Task { await model.perform(action, on: server) }
+            Task {
+                if await model.perform(action, on: server) { app.followInLiveActivity(action, on: server) }
+            }
         }
     }
 }

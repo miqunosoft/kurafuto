@@ -98,10 +98,15 @@ final class MockCraftyService: CraftyService, @unchecked Sendable {
                     self?.stats[serverID]?.memPercent = 27
                 }
                 self?.appendConsole(serverID, "[\(MockData.consoleTime(.now)) INFO]: Done (8.214s)! For help, type \"help\"")
+                try? await Task.sleep(for: .seconds(2))
+                self?.sync {
+                    if self?.stats[serverID]?.running == true { self?.stats[serverID]?.answersPing = true }
+                }
             }
         case .stop, .kill:
             sync {
                 stats[serverID]?.running = false
+                stats[serverID]?.answersPing = false
                 stats[serverID]?.started = nil
                 stats[serverID]?.online = 0
                 stats[serverID]?.players = []
@@ -283,6 +288,21 @@ final class MockCraftyService: CraftyService, @unchecked Sendable {
     func startBackup(serverID: String, configID: String) async throws {
         try await simulate()
         addArchive(serverID: serverID, configID: configID)
+    }
+    /// Ten steps of one latency each, then a good result.
+    func backupProgress(serverID: String, idleTimeout: Duration?) -> AsyncStream<BackupProgress> {
+        let step = latency
+        return AsyncStream { continuation in
+            let task = Task {
+                defer { continuation.finish() }
+                for done in 0..<10 {
+                    guard (try? await Task.sleep(for: step)) != nil else { return }
+                    continuation.yield(.running(Double(done) / 10))
+                }
+                continuation.yield(.finished(failed: false))
+            }
+            continuation.onTermination = { _ in task.cancel() }
+        }
     }
     func restoreBackup(_ file: BackupFile, configID: String, inPlace: Bool, serverID: String) async throws {
         try await simulate()

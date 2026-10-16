@@ -48,6 +48,8 @@ targets:
         CFBundleURLTypes:
           - CFBundleURLName: dev.miquno.kurafuto
             CFBundleURLSchemes: [kurafuto]
+        # Start-up and backup progress on the Lock Screen and in the Dynamic Island (ADR 0011).
+        NSSupportsLiveActivities: true
     entitlements:
       path: Kurafuto/Resources/Kurafuto.entitlements
       properties:
@@ -60,7 +62,8 @@ targets:
   KurafutoWidgets:
     type: app-extension
     platform: iOS
-    # Reads only the widget snapshot the app writes (ADR 0009); these app files are shared with it.
+    # Reads only the widget snapshot the app writes (ADR 0009) and draws the app's Live Activities (ADR 0011);
+    # these app files are shared with it.
     sources:
       - path: KurafutoWidgets
         excludes:
@@ -68,6 +71,7 @@ targets:
           - "**/CLAUDE.md"
       - Kurafuto/Core/Storage/WidgetSnapshot.swift
       - Kurafuto/Core/Models/ServerStats.swift
+      - Kurafuto/Core/Models/ServerActivity.swift
       - Kurafuto/DesignSystem/Palette.swift
       - Kurafuto/Resources/Localizable.xcstrings
     info:

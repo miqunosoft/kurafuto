@@ -55,7 +55,7 @@ Kurafuto's goal: **everything the Crafty Controller web dashboard can do, as a p
 
 ## 1.0 – App Store
 
-- [ ] Live Activities for start-up and backups.
+- [x] Live Activities for start-up and backups (ADR 0011; updated by the app, no push relay).
 - [ ] Accessibility pass (VoiceOver, Dynamic Type, contrast).
 - [ ] App Store listing, review notes with demo mode, privacy label "Data Not Collected" (`docs/app-store/`).
 - [ ] Optional: ask Arcadia Technology about mentioning Crafty in the listing.

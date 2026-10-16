@@ -24,7 +24,9 @@ private struct EULAPrompt: ViewModifier {
                       presenting: server) { s in
             Button("Accept and Start") {
                 Task {
-                    await $error.capture { try await app.service.acceptEULA(serverID: s.id) }
+                    if await $error.capture({ try await app.service.acceptEULA(serverID: s.id) }) {
+                        app.followInLiveActivity(.start, on: s)
+                    }
                     await onAccepted()
                 }
             }

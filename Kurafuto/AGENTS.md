@@ -6,8 +6,8 @@ All app sources. XcodeGen picks up new files through the folder glob in `project
 
 | Folder | Owns |
 |---|---|
-| `App/` | `KurafutoApp`, `AppState` (active panel + service + panel rights + app lock), `RootView` (incl. app-switcher privacy cover, lock screen and `kurafuto://` links), tabs; `AppLock` (Face ID / passcode via LocalAuthentication), `.destructiveConfirmation`; `WidgetSync` (writes the widget snapshot) |
-| `Core/Models/` | `Codable` models that mirror Crafty's `openapi-spec.yml` (snake_case `CodingKeys`). Tolerant decoding for Crafty's string-typed numbers |
+| `App/` | `KurafutoApp`, `AppState` (active panel + service + panel rights + app lock), `RootView` (incl. app-switcher privacy cover, lock screen and `kurafuto://` links), tabs; `AppLock` (Face ID / passcode via LocalAuthentication), `.destructiveConfirmation`; `WidgetSync` (writes the widget snapshot); `ServerActivities` (Live Activities for start-ups and backups, `StartUpWatch`, ADR 0011) |
+| `Core/Models/` | `Codable` models that mirror Crafty's `openapi-spec.yml` (snake_case `CodingKeys`). Tolerant decoding for Crafty's string-typed numbers. `ServerActivity.swift` (Live Activity attributes) is shared with `KurafutoWidgets` |
 | `Core/Networking/` | `APIClient`: bearer auth, `{status,data}` envelope (`requestUnwrapped` for routes without it), console WebSocket (`token` cookie), ephemeral `URLSession`, certificate pinning delegate |
 | `Core/Services/` | `CraftyService` protocol, `LiveCraftyService` (real API, ✅/⚠️ markers), `CraftyConsoleFeed` (WebSocket and `/logs` parsing), `MockCraftyService` + `MockData` |
 | `Core/Storage/` | `KeychainStore` (tokens), `InstanceStore` (panel list in Application Support, no secrets), `WidgetSnapshot` + `WidgetSnapshotStore` + `ServerLink` (shared with `KurafutoWidgets`, ADR 0009) |

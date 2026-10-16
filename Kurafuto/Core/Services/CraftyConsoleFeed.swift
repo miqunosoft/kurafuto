@@ -39,6 +39,23 @@ enum CraftyConsoleFeed {
         return request.data.id
     }
 
+    /// Progress in `{"event":"backup_status","data":{"percent":42.5,"total_files":"1.2GB","backup_id":"…"}}`, sent to the
+    /// server page for every archived file. Percent is 0...100; 100 also ends a failed backup. The first event has
+    /// no `backup_id`.
+    static func backupStatus(fromSocketMessage text: String) -> (percent: Double, backupID: String?)? {
+        struct Status: Decodable {
+            struct Payload: Decodable {
+                let percent: Double
+                let backup_id: String?
+            }
+            let event: String
+            let data: Payload
+        }
+        guard let status = try? JSONDecoder().decode(Status.self, from: Data(text.utf8)),
+              status.event == "backup_status", status.data.percent.isFinite else { return nil }
+        return (min(max(status.data.percent, 0), 100), status.data.backup_id)
+    }
+
     /// Crafty escapes the raw line, then wraps parts in `<span>` tags and appends `<br />`.
     /// Since the text itself is escaped, every `<` is markup: strip tags first, then unescape.
     static func plainLines(fromHTML html: String) -> [String] {

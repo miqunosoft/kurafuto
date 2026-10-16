@@ -8,6 +8,8 @@ struct KurafutoApp: App {
         let state = AppState.bootstrap()
         _app = State(initialValue: state)
         ServerShortcuts.app = state
+        // A previous run can no longer update its activities.
+        Task { await state.activities.endAll() }
     }
 
     var body: some Scene {
@@ -26,6 +28,7 @@ final class AppState {
     var service: CraftyService
     var isMock: Bool
     let lock: AppLock
+    let activities = ServerActivities()
     /// Panel-wide rights of the signed-in user; nil until loaded or when loading failed.
     var access: PanelAccess?
     /// The panel rejected the active token; RootView asks to sign in again.
@@ -70,6 +73,7 @@ final class AppState {
         activeInstance = instance
         access = nil
         WidgetSync.clear()
+        Task { [activities] in await activities.endAll() }
         service = LiveCraftyService(client: APIClient(baseURL: instance.baseURL,
                                                       token: instanceStore.token(for: instance),
                                                       pinnedSHA256: instance.pinnedCertificateSHA256))
@@ -113,6 +117,7 @@ final class AppState {
         activeInstance = nil
         access = nil
         WidgetSync.clear()
+        Task { [activities] in await activities.endAll() }
     }
 }
 
@@ -120,6 +125,12 @@ extension AppState {
     @MainActor
     func refreshAccess() async {
         access = try? await service.panelAccess()
+    }
+
+    /// Shows a start or backup the panel accepted as a Live Activity; the server's name stays off it while the app lock is on.
+    @MainActor
+    func followInLiveActivity(_ action: ServerAction, on server: Server) {
+        activities.follow(action, serverID: server.id, name: lock.isEnabled ? nil : server.serverName, service: service)
     }
 
     // While the rights are unknown, the UI stays complete: the panel enforces them on every request

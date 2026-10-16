@@ -256,6 +256,7 @@ struct ServerDetailView: View {
         do {
             try await app.service.send(action, serverID: server.id)
             UINotificationFeedbackGenerator().notificationOccurred(.success)
+            app.followInLiveActivity(action, on: server)
         } catch CraftyError.eulaRequired {
             eulaServer = server
         } catch {

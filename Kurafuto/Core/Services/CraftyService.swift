@@ -46,6 +46,9 @@ protocol CraftyService: AnyObject, Sendable {
     /// Nil when the panel cannot list the archives: Crafty 4.7 has no list endpoint, and snapshot configs are never listed.
     func backupFiles(serverID: String, config: BackupConfig) async throws -> [BackupFile]?
     func startBackup(serverID: String, configID: String) async throws
+    /// Follows the server's running or next backup until it ends. Live: `backup_status` events on the panel WebSocket
+    /// (undocumented). Ends without a result when the socket fails, or after `idleTimeout` without an event.
+    func backupProgress(serverID: String, idleTimeout: Duration?) -> AsyncStream<BackupProgress>
     /// `inPlace` unpacks over the current files; otherwise the panel empties the server folder first.
     func restoreBackup(_ file: BackupFile, configID: String, inPlace: Bool, serverID: String) async throws
     func deleteBackup(_ file: BackupFile, configID: String, serverID: String) async throws

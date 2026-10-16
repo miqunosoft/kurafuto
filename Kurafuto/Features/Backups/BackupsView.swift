@@ -187,6 +187,7 @@ struct BackupsView: View {
         let ok = await $actionError.capture { try await app.service.startBackup(serverID: server.id, configID: c.id) }
         running = false
         if ok {
+            app.followInLiveActivity(.backup, on: server)
             notice = Notice(title: String(localized: "Backup Started"),
                             message: String(localized: "The panel creates the archive in the background. Pull down to refresh the list."))
         }
