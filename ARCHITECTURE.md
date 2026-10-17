@@ -20,7 +20,7 @@ Kurafuto is a single-target SwiftUI app with no backend of its own and no third-
 
 1. **Features** – screens. They own view state only, call `app.service`, and show errors via `LoadableView`.
 2. **Services** – `CraftyService` is the single seam. `LiveCraftyService` maps calls to API v2 endpoints (see `docs/api/crafty-api-v2.md`); `MockCraftyService` simulates the same behavior in memory.
-3. **Networking** – `APIClient` handles the `{status, data}` envelope (and the backup routes that answer without it), bearer tokens, errors, and certificate trust.
+3. **Networking** – `APIClient` handles the `{status, data}` envelope (and the backup routes that answer without it), bearer tokens, errors, and certificate trust. It follows redirects only within the panel's own scheme, host and port.
 4. **Storage** – `KeychainStore` for tokens, `InstanceStore` for the list of panels.
 
 ## Data ownership

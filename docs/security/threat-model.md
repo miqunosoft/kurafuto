@@ -1,6 +1,6 @@
 # Threat model
 
-- Last reviewed: 2026-10-15 (0.4 widgets, Siri and Shortcuts)
+- Last reviewed: 2026-10-17 (redirects stay on the panel)
 - Update this document in the same pull request whenever a trust boundary, data category, network peer or stored secret changes.
 
 ## System today
@@ -43,7 +43,7 @@ An iOS app with no backend. The user adds one or more Crafty Controller panels (
 
 | Threat | Boundary | Mitigation | Status |
 |---|---|---|---|
-| Token or password interception | B1 | HTTPS only; App Transport Security stays on; no `NSAllowsArbitraryLoads`/`NSAllowsLocalNetworking`; ephemeral `URLSession` (no cookie/cache persistence) | Implemented |
+| Token or password interception | B1 | HTTPS only; App Transport Security stays on; no `NSAllowsArbitraryLoads`/`NSAllowsLocalNetworking`; ephemeral `URLSession` (no cookie/cache persistence); redirects followed only to the panel's own scheme, host and port, anything else fails with `CraftyError.redirected` | Implemented |
 | MITM with a forged certificate on a self-signed panel | B1 | Self-signed certificates are rejected unless their SHA-256 fingerprint was explicitly confirmed by the user and pinned per panel (ADR 0004) | Implemented; UI to review/reset pins in 0.2 |
 | Token leak through the console WebSocket | B1 | Same host and pinned, ephemeral session as the API; token only in the `Cookie` header, never in the URL; `wss` for `https` panels | Implemented |
 | XSS/markup injection via MOTD, chat, logs, file contents | B2 | All panel strings rendered as plain `Text`; WebSocket console lines are stripped of tags and unescaped into plain text (`CraftyConsoleFeed`), unknown events ignored, console capped at 1,000 lines; Minecraft formatting codes stripped; no `WKWebView`, no HTML/Markdown rendering | Implemented |

@@ -9178,6 +9178,28 @@
         }
       }
     },
+    "The panel redirected to another address. Kurafuto only connects to the address you added." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Panel hat auf eine andere Adresse umgeleitet. Kurafuto verbindet sich nur mit der Adresse, die du hinzugefügt hast."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "パネルが別のアドレスにリダイレクトしました。Kurafuto は追加したアドレスにのみ接続します。"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "面板重定向到了另一个地址。Kurafuto 只连接你添加的地址。"
+          }
+        }
+      }
+    },
     "The panel rejected this token." : {
       "localizations" : {
         "de" : {

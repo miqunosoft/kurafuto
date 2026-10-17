@@ -136,7 +136,9 @@ final class APIClient: NSObject, @unchecked Sendable {
             throw CraftyError.transport(error)
         }
 
-        return (data, (response as? HTTPURLResponse)?.statusCode ?? 0)
+        let status = (response as? HTTPURLResponse)?.statusCode ?? 0
+        if (300..<400).contains(status) { throw CraftyError.redirected }
+        return (data, status)
     }
 
     /// WebSocket on the same pinned, ephemeral session. Crafty reads the token only from the `token`
@@ -164,6 +166,7 @@ final class APIClient: NSObject, @unchecked Sendable {
         do { (data, response) = try await session.data(for: req) }
         catch { throw CraftyError.transport(error) }
         let status = (response as? HTTPURLResponse)?.statusCode ?? 0
+        if (300..<400).contains(status) { throw CraftyError.redirected }
         guard (200..<300).contains(status) else {
             let envelope = try? JSONDecoder().decode(Envelope<Empty>.self, from: data)
             throw fail(Self.failure(status: status, error: envelope?.error, detail: envelope?.errorData, path: path))
@@ -192,6 +195,24 @@ final class APIClient: NSObject, @unchecked Sendable {
 extension Notification.Name {
     /// Posted with the `APIClient` as object when the panel rejects its token.
     static let panelSessionExpired = Notification.Name("PanelSessionExpired")
+}
+
+// MARK: - Redirects stay on the panel
+extension APIClient: URLSessionTaskDelegate {
+    /// A redirect is followed only to the panel's own scheme, host and port, so neither a proxy nor a hostile
+    /// panel can send the request and its token to another host. Refused redirects end as `CraftyError.redirected`.
+    func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse,
+                    newRequest request: URLRequest) async -> URLRequest? {
+        guard let target = request.url, Self.sameOrigin(target, baseURL) else { return nil }
+        return request
+    }
+
+    static func sameOrigin(_ a: URL, _ b: URL) -> Bool {
+        func port(_ url: URL) -> Int? { url.port ?? ["https": 443, "wss": 443, "http": 80, "ws": 80][url.scheme?.lowercased() ?? ""] }
+        return a.scheme?.lowercased() == b.scheme?.lowercased()
+            && a.host()?.lowercased() == b.host()?.lowercased()
+            && port(a) == port(b)
+    }
 }
 
 // MARK: - Self-signed certificates (Crafty default) – trust on first use with pinning
