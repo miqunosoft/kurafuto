@@ -23,6 +23,8 @@ struct ServerStats: Codable, Hashable {
     var waitingStart: Bool
     var firstRun: Bool
     var crashed: Bool
+    /// The server answered the panel's ping, so players can join. Saved by the panel every 30 s.
+    var answersPing: Bool
 
     enum CodingKeys: String, CodingKey {
         case running, started, cpu, mem
@@ -34,19 +36,21 @@ struct ServerStats: Codable, Hashable {
         case waitingStart = "waiting_start"
         case firstRun = "first_run"
         case crashed
+        case answersPing = "int_ping_results"
     }
 
     init(running: Bool, started: String? = nil, cpu: Double, mem: String, memPercent: Double,
          worldName: String? = nil, worldSize: String? = nil, serverPort: Int? = nil,
          online: Int, max: Int, players: [String], desc: String? = nil, icon: String? = nil,
          version: String? = nil, updating: Bool = false, waitingStart: Bool = false,
-         firstRun: Bool = false, crashed: Bool = false) {
+         firstRun: Bool = false, crashed: Bool = false, answersPing: Bool = false) {
         self.running = running; self.started = started; self.cpu = cpu; self.mem = mem
         self.memBytes = ByteSize.bytes(fromPanelText: mem)
         self.memPercent = memPercent; self.worldName = worldName; self.worldSize = worldSize
         self.serverPort = serverPort; self.online = online; self.max = max; self.players = players
         self.desc = desc; self.icon = icon; self.version = version; self.updating = updating
         self.waitingStart = waitingStart; self.firstRun = firstRun; self.crashed = crashed
+        self.answersPing = answersPing
     }
 
     init(from decoder: Decoder) throws {
@@ -88,6 +92,8 @@ struct ServerStats: Codable, Hashable {
         waitingStart = (try? c.decodeIfPresent(Bool.self, forKey: .waitingStart)) ?? false
         firstRun = (try? c.decodeIfPresent(Bool.self, forKey: .firstRun)) ?? false
         crashed = (try? c.decodeIfPresent(Bool.self, forKey: .crashed)) ?? false
+        // Stored as text: "True" or "False" (4.7.0, 4.11.0).
+        answersPing = (try? c.decode(Bool.self, forKey: .answersPing)) ?? (c.lenientString(.answersPing) == "True")
     }
 
     var status: ServerStatus {

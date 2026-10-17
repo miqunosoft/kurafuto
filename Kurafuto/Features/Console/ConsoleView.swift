@@ -3,6 +3,8 @@ import SwiftUI
 /// Live console with command input, quick commands and history.
 struct ConsoleView: View {
     @Environment(AppState.self) private var app
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.dynamicTypeSize) private var typeSize
     let server: Server
     @State private var lines: [LogLine] = []
     @State private var input = ""
@@ -26,16 +28,16 @@ struct ConsoleView: View {
                                 .textSelection(.enabled)
                                 .frame(maxWidth: .infinity, alignment: .leading)
                                 .id(line.id)
-                                .transition(.asymmetric(insertion: .move(edge: .bottom).combined(with: .opacity),
-                                                        removal: .opacity))
+                                .transition(reduceMotion ? .opacity : .asymmetric(insertion: .move(edge: .bottom).combined(with: .opacity),
+                                                                                  removal: .opacity))
                         }
                     }
                     .padding(12)
-                    .animation(.snappy(duration: 0.25), value: lines.last?.id)
+                    .animation(reduceMotion ? nil : .snappy(duration: 0.25), value: lines.last?.id)
                 }
                 .background(Theme.console)
                 .onChange(of: lines.last?.id) {
-                    if autoScroll, let last = lines.last { withAnimation { proxy.scrollTo(last.id, anchor: .bottom) } }
+                    if autoScroll, let last = lines.last { withAnimation(reduceMotion ? nil : .default) { proxy.scrollTo(last.id, anchor: .bottom) } }
                 }
             }
 
@@ -55,7 +57,7 @@ struct ConsoleView: View {
                     .padding(.horizontal, 16)
                 }
 
-                HStack(spacing: 8) {
+                AdaptiveStack(spacing: 8) {
                     HStack(spacing: 8) {
                         Text(verbatim: ">").font(.mono(.body, weight: .semibold)).foregroundStyle(Theme.accent)
                             .accessibilityHidden(true)
@@ -80,7 +82,7 @@ struct ConsoleView: View {
                         Image(systemName: "arrow.right").font(.body.weight(.bold))
                     }
                     .buttonStyle(InstrumentButtonStyle())
-                    .frame(width: 48)
+                    .frame(width: typeSize.isAccessibilitySize ? nil : 48)
                     .disabled(input.isEmpty)
                     .accessibilityLabel("Send command")
                 }

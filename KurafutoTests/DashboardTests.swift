@@ -74,7 +74,8 @@ final class DashboardTests: XCTestCase {
         model.attach(MockCraftyService(latency: .zero))
         await model.load()
         let server = MockData.servers[0]
-        await model.perform(.stop, on: server)
+        let accepted = await model.perform(.stop, on: server)
+        XCTAssertTrue(accepted)
         XCTAssertEqual(model.stats[server.id]?.running, false)
         XCTAssertNil(model.busy)
         XCTAssertNil(model.actionError)

@@ -6,6 +6,7 @@ import SwiftUI
 /// Panel name (a menu to switch panels when there are several), connection state and the create button.
 struct DashboardHeader: View {
     @Environment(AppState.self) private var app
+    @Environment(\.dynamicTypeSize) private var typeSize
     let problem: PanelProblem?
     let onCreate: (() -> Void)?
 
@@ -19,7 +20,8 @@ struct DashboardHeader: View {
                 panelTitle
                 HStack(spacing: 6) {
                     Circle().fill(problem == nil ? Theme.accent : Theme.warning).frame(width: 8, height: 8)
-                    Text(subtitle).font(.subheadline).foregroundStyle(Theme.secondaryText).lineLimit(1)
+                    Text(subtitle).font(.subheadline).foregroundStyle(Theme.secondaryText)
+                        .lineLimit(typeSize.isAccessibilitySize ? nil : 1)
                 }
                 .accessibilityElement(children: .combine)
             }
@@ -78,10 +80,12 @@ struct CrashBanner: View {
     let server: Server
 
     var body: some View {
-        HStack(spacing: 12) {
-            Image(systemName: "exclamationmark.circle.fill").font(.title2)
-            Text("\(server.serverName) crashed").font(.headline).lineLimit(2)
-                .frame(maxWidth: .infinity, alignment: .leading)
+        AdaptiveStack(spacing: 12) {
+            HStack(spacing: 12) {
+                Image(systemName: "exclamationmark.circle.fill").font(.title2)
+                Text("\(server.serverName) crashed").font(.headline)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
             HStack(spacing: 4) {
                 Text("Logs").font(.subheadline.weight(.medium))
                 Image(systemName: "chevron.right").font(.caption.weight(.semibold))
@@ -106,6 +110,7 @@ struct ServerTabBar: View {
     let stats: [String: ServerStats]
     @Binding var selection: String?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.accessibilityDifferentiateWithoutColor) private var withoutColor
     @Namespace private var underline
 
     var body: some View {
@@ -135,7 +140,11 @@ struct ServerTabBar: View {
                         .foregroundStyle(selected ? Theme.accent : Theme.secondaryText)
                         .lineLimit(1)
                     if stats[server.id]?.crashed == true {
-                        Circle().fill(Theme.danger).frame(width: 7, height: 7)
+                        if withoutColor {
+                            Image(systemName: "exclamationmark.circle.fill").font(.caption).foregroundStyle(Theme.danger)
+                        } else {
+                            Circle().fill(Theme.danger).frame(width: 7, height: 7)
+                        }
                     }
                 }
                 ZStack {
@@ -162,16 +171,17 @@ struct ServerOverviewCard: View {
     let server: Server
     let stats: ServerStats?
     let history: [StatSample]
+    @Environment(\.dynamicTypeSize) private var typeSize
 
     private var status: ServerStatus { stats?.status ?? .offline }
     private var ramCeiling: Double? { server.maxMemoryBytes }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
-            HStack(alignment: .top, spacing: 12) {
+            AdaptiveStack(alignment: .top, spacing: 12) {
                 VStack(alignment: .leading, spacing: 6) {
                     Text(server.serverName).font(.title2.weight(.bold)).foregroundStyle(.primary).lineLimit(2)
-                    HStack(spacing: 10) {
+                    AdaptiveStack(spacing: 10) {
                         Text(stats?.version ?? server.type.label).font(.subheadline).foregroundStyle(Theme.secondaryText)
                             .lineLimit(1)
                         StatusPill(status: status)
@@ -190,11 +200,13 @@ struct ServerOverviewCard: View {
                 }
                 .accessibilityLabel("Server details")
             }
-            HStack(alignment: .top, spacing: 16) {
+            AdaptiveStack(alignment: .top, spacing: 16) {
                 MetricColumn(title: "CPU", value: cpuText, caption: nil, color: Theme.cpu,
                              samples: history.map { ($0.date, $0.cpu) }, ceiling: 100, axis: .leading,
                              label: { "\(Int($0)) %" })
-                Rectangle().fill(Theme.divider).frame(width: 1).padding(.vertical, 4)
+                Rectangle().fill(Theme.divider)
+                    .frame(width: typeSize.isAccessibilitySize ? nil : 1, height: typeSize.isAccessibilitySize ? 1 : nil)
+                    .padding(typeSize.isAccessibilitySize ? .horizontal : .vertical, 4)
                 MetricColumn(title: "RAM", value: ramText, caption: ramCeiling.map { String(localized: "of \(Self.gigabytes($0))") },
                              color: Theme.ram, samples: history.map { ($0.date, $0.memBytes) },
                              ceiling: ramCeiling ?? max(history.map(\.memBytes).max() ?? 0, 1), axis: .trailing,
@@ -248,7 +260,7 @@ struct MetricColumn: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             Text(title).font(.subheadline.weight(.medium)).foregroundStyle(.primary)
-            HStack(alignment: .firstTextBaseline) {
+            AdaptiveStack(alignment: .firstTextBaseline) {
                 Text(value).font(.system(.largeTitle, design: .rounded).weight(.bold)).monospacedDigit()
                     .contentTransition(.numericText()).lineLimit(1).minimumScaleFactor(0.7)
                 Spacer(minLength: 4)
@@ -303,16 +315,19 @@ struct MetricColumn: View {
 struct PlayersCard: View {
     let server: Server
     let stats: ServerStats?
+    @ScaledMetric(relativeTo: .footnote) private var nameWidth: CGFloat = 72
 
     var body: some View {
         NavigationLink(value: DashboardRoute.players(server)) {
             VStack(alignment: .leading, spacing: 16) {
-                HStack(alignment: .firstTextBaseline) {
+                AdaptiveStack(alignment: .firstTextBaseline) {
                     Text("Players").font(.title3.weight(.bold)).foregroundStyle(.primary)
                     Spacer()
-                    PlayerCount(online: stats?.online ?? 0, max: stats?.max ?? 0, large: true)
-                    Image(systemName: "chevron.right").font(.subheadline.weight(.semibold))
-                        .foregroundStyle(Theme.secondaryText).accessibilityHidden(true)
+                    HStack(alignment: .firstTextBaseline) {
+                        PlayerCount(online: stats?.online ?? 0, max: stats?.max ?? 0, large: true)
+                        Image(systemName: "chevron.right").font(.subheadline.weight(.semibold))
+                            .foregroundStyle(Theme.secondaryText).accessibilityHidden(true)
+                    }
                 }
                 if let players = stats?.players, !players.isEmpty {
                     ScrollView(.horizontal, showsIndicators: false) {
@@ -320,7 +335,7 @@ struct PlayersCard: View {
                             ForEach(players, id: \.self) { name in
                                 VStack(spacing: 8) {
                                     PixelAvatar(name: name, size: 56)
-                                    Text(name).font(.footnote).foregroundStyle(.primary).lineLimit(1).frame(maxWidth: 72)
+                                    Text(name).font(.footnote).foregroundStyle(.primary).lineLimit(1).frame(maxWidth: nameWidth)
                                 }
                                 .accessibilityElement(children: .combine)
                             }
@@ -347,7 +362,7 @@ struct ServerActionBar: View {
     let perform: (ServerAction) -> Void
 
     var body: some View {
-        HStack(spacing: 12) {
+        AdaptiveStack(spacing: 12) {
             NavigationLink(value: DashboardRoute.console(server)) {
                 Label("Console", systemImage: "apple.terminal").frame(minHeight: 52)
             }
@@ -385,7 +400,7 @@ struct ConsolePreviewCard: View {
     var body: some View {
         NavigationLink(value: DashboardRoute.console(server)) {
             VStack(alignment: .leading, spacing: 12) {
-                HStack {
+                AdaptiveStack {
                     Text("Console").font(.title3.weight(.bold)).foregroundStyle(.primary)
                     Spacer()
                     HStack(spacing: 4) {

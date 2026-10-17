@@ -156,6 +156,59 @@ final class LiveCraftyService: CraftyService, @unchecked Sendable {
         }
     }
 
+    /// Progress from the panel WebSocket `/ws` ⚠️ (same subscription as the console). After the last event the panel
+    /// stores the result in the config's `status`, which only `GET …/backups/backup/{id}` returns.
+    func backupProgress(serverID: String, idleTimeout: Duration?) -> AsyncStream<BackupProgress> {
+        AsyncStream { continuation in
+            let task = Task {
+                defer { continuation.finish() }
+                guard let socket = try? self.client.webSocket("/ws", query: CraftyConsoleFeed.socketQuery(serverID: serverID)) else { return }
+                socket.resume()
+                let keepAlive = Task { await Self.keepAlive(socket) }
+                defer {
+                    keepAlive.cancel()
+                    socket.cancel(with: .goingAway, reason: nil)
+                }
+                var deadline = idleTimeout.map { ContinuousClock.now + $0 }
+                while !Task.isCancelled, let message = try? await Self.receive(from: socket, until: deadline) {
+                    guard let event = CraftyConsoleFeed.backupStatus(fromSocketMessage: message) else { continue }
+                    deadline = idleTimeout.map { ContinuousClock.now + $0 }
+                    guard event.percent >= 100 else {
+                        continuation.yield(.running(event.percent / 100))
+                        continue
+                    }
+                    try? await Task.sleep(for: .seconds(2))
+                    continuation.yield(.finished(failed: await self.lastBackupFailed(serverID: serverID, configID: event.backupID)))
+                    return
+                }
+            }
+            continuation.onTermination = { _ in task.cancel() }
+        }
+    }
+
+    private func lastBackupFailed(serverID: String, configID: String?) async -> Bool? {
+        struct Config: Decodable { let status: String }
+        guard let configID, BackupConfig.isValidID(configID),
+              let config: Config = try? await client.requestUnwrapped(.get, "/api/v2/servers/\(serverID)/backups/backup/\(configID)")
+        else { return nil }
+        return BackupConfig.lastRunFailed(status: config.status)
+    }
+
+    /// `receive` that gives up at `deadline`, cancelling the socket.
+    private static func receive(from socket: URLSessionWebSocketTask, until deadline: ContinuousClock.Instant?) async throws -> String {
+        guard let deadline else { return try await receive(from: socket) }
+        return try await withThrowingTaskGroup(of: String.self) { group in
+            group.addTask { try await receive(from: socket) }
+            group.addTask {
+                try await Task.sleep(until: deadline, clock: .continuous)
+                throw URLError(.timedOut)
+            }
+            defer { group.cancelAll() }
+            guard let first = try await group.next() else { throw URLError(.timedOut) }
+            return first
+        }
+    }
+
     /// Crafty stays silent while a server is idle, so a dead connection only shows up through pings.
     private static func keepAlive(_ socket: URLSessionWebSocketTask) async {
         while !Task.isCancelled {

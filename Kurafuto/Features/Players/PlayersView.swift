@@ -4,6 +4,8 @@ import SwiftUI
 /// everything goes through console commands (stdin) plus reading ops.json / whitelist.json / banned-players.json.
 struct PlayersView: View {
     @Environment(AppState.self) private var app
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.dynamicTypeSize) private var typeSize
     let server: Server
     @State private var online: [String] = []
     @State private var newName = ""
@@ -23,7 +25,8 @@ struct PlayersView: View {
                     }
                     ForEach(online, id: \.self) { name in
                         HStack {
-                            PlayerInitialsAvatar(name: name)
+                            // Decorative; at accessibility sizes the name needs the width.
+                            if !typeSize.isAccessibilitySize { PlayerInitialsAvatar(name: name) }
                             Text(name).font(.mono(.body))
                             Spacer()
                             Menu {
@@ -66,7 +69,7 @@ struct PlayersView: View {
                     .background(Theme.surface, in: Capsule())
                     .overlay(Capsule().strokeBorder(Theme.stroke))
                     .padding()
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                    .transition(reduceMotion ? .opacity : .move(edge: .bottom).combined(with: .opacity))
             }
         }
         .task {
@@ -83,7 +86,9 @@ struct PlayersView: View {
     private func cmd(_ c: String) {
         Task {
             guard await $actionError.capture({ try await app.service.sendCommand(c, serverID: server.id) }) else { return }
-            withAnimation { toast = String(localized: "Sent: \(c)") }
+            let sent = String(localized: "Sent: \(c)")
+            withAnimation { toast = sent }
+            AccessibilityNotification.Announcement(sent).post()
             try? await Task.sleep(for: .seconds(2))
             withAnimation { toast = nil }
         }
@@ -94,11 +99,12 @@ struct PlayersView: View {
 /// and the user's IP address to a third party (see docs/decisions/0002-no-data-collection.md).
 struct PlayerInitialsAvatar: View {
     let name: String
+    @ScaledMetric(relativeTo: .caption) private var size: CGFloat = 32
     var body: some View {
         Text(name.prefix(2).uppercased())
             .font(.caption.weight(.bold).monospaced())
             .foregroundStyle(Theme.players)
-            .frame(width: 32, height: 32)
+            .frame(width: size, height: size)
             .background(Theme.players.opacity(0.15), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
             .accessibilityHidden(true)
     }

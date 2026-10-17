@@ -68,7 +68,7 @@ struct WebhooksView: View {
 
     private func row(_ h: Webhook) -> some View {
         VStack(alignment: .leading, spacing: 4) {
-            HStack {
+            AdaptiveStack {
                 Text(h.name).font(.headline).foregroundStyle(.primary)
                 Spacer()
                 Text(h.type).font(.mono(.caption2, weight: .medium))

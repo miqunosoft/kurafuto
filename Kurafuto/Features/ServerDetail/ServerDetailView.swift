@@ -5,6 +5,8 @@ import Charts
 /// Overview · Console · Logs · Schedules · Backups · Files · Players · Webhooks · Config
 struct ServerDetailView: View {
     @Environment(AppState.self) private var app
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.dynamicTypeSize) private var typeSize
     @State var server: Server
     @State private var stats: ServerStats?
     @State private var history: [StatPoint] = []
@@ -58,7 +60,7 @@ struct ServerDetailView: View {
     // MARK: Sections
 
     private var header: some View {
-        HStack(alignment: .top, spacing: 14) {
+        AdaptiveStack(alignment: .top, spacing: 14) {
             ServerIcon(base64: stats?.icon, type: server.type)
             VStack(alignment: .leading, spacing: 4) {
                 StatusBadge(status: stats?.status ?? .offline)
@@ -77,7 +79,7 @@ struct ServerDetailView: View {
 
     private var controls: some View {
         let running = stats?.running == true
-        return HStack(spacing: 10) {
+        return AdaptiveStack(spacing: 10) {
             actionButton(.start, enabled: !running, color: Theme.accent)
             actionButton(.restart, enabled: running, color: Theme.warning)
             actionButton(.stop, enabled: running, color: Theme.danger)
@@ -92,7 +94,9 @@ struct ServerDetailView: View {
                                         buttonLabel: String(localized: "Stop")) { await run(a) }
             } else { Task { await run(a) } }
         } label: {
-            VStack(spacing: 4) {
+            // Side by side the buttons stack icon over label; at accessibility sizes they are rows of their own.
+            let layout = typeSize.isAccessibilitySize ? AnyLayout(HStackLayout(spacing: 10)) : AnyLayout(VStackLayout(spacing: 4))
+            layout {
                 Group {
                     if busyAction == a { ProgressView().tint(color) } else { Image(systemName: a.symbol).font(.title3) }
                 }
@@ -108,7 +112,7 @@ struct ServerDetailView: View {
     private func live(_ s: ServerStats) -> some View {
         VStack(spacing: 10) {
             SectionLabel("Live")
-            HStack(spacing: 10) {
+            AdaptiveStack(spacing: 10) {
                 GaugeTile(title: "CPU", value: s.cpu, color: Theme.cpu, delay: 0.2)
                 GaugeTile(title: "RAM", value: s.memPercent, color: Theme.ram, caption: s.mem, delay: 0.3)
                 ValueTile(title: "World", value: s.worldSize ?? "–", color: Theme.storage)
@@ -146,7 +150,7 @@ struct ServerDetailView: View {
                 }
             }
             .frame(height: 130)
-            .animation(.snappy, value: history.count)
+            .animation(reduceMotion ? nil : .snappy, value: history.count)
             .accessibilityLabel("CPU and RAM over time")
         }
     }
@@ -197,7 +201,7 @@ struct ServerDetailView: View {
     }
 
     private func detail<V: View>(_ title: LocalizedStringKey, @ViewBuilder value: () -> V) -> some View {
-        HStack {
+        AdaptiveStack {
             Text(title).foregroundStyle(Theme.secondaryText)
             Spacer()
             value().font(.mono(.footnote))
@@ -256,6 +260,7 @@ struct ServerDetailView: View {
         do {
             try await app.service.send(action, serverID: server.id)
             UINotificationFeedbackGenerator().notificationOccurred(.success)
+            app.followInLiveActivity(action, on: server)
         } catch CraftyError.eulaRequired {
             eulaServer = server
         } catch {

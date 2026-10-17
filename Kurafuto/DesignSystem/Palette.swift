@@ -58,6 +58,8 @@ enum AccentRole: String, CaseIterable, Identifiable {
 
 /// A fixed set of accent colors instead of a free color picker, so every choice keeps
 /// readable contrast on all three backgrounds. Light mode uses a darker shade of each.
+/// Every shade reaches WCAG AA (4.5:1) as text on the backgrounds and on a tint of itself up to 16 %
+/// (`AccessibilityTests`); keep tints behind colored text at or below that.
 enum AccentPreset: String, CaseIterable, Identifiable {
     case cyan, green, violet, amber, pink, blue, orange
 
@@ -78,19 +80,19 @@ enum AccentPreset: String, CaseIterable, Identifiable {
     func color(for mode: ThemeMode) -> Color {
         let hex: UInt32 = switch (self, mode == .light) {
         case (.cyan, false): 0x3DD9EB
-        case (.cyan, true): 0x007C8F
+        case (.cyan, true): 0x006A7B
         case (.green, false): 0x5BD27A
-        case (.green, true): 0x1B7A3B
-        case (.violet, false): 0x9B8CFF
+        case (.green, true): 0x186D35
+        case (.violet, false): 0xAB9EFF
         case (.violet, true): 0x5B47D6
         case (.amber, false): 0xFFB547
-        case (.amber, true): 0x8F5500
-        case (.pink, false): 0xFF7AB8
+        case (.amber, true): 0x8C5300
+        case (.pink, false): 0xFF7DB9
         case (.pink, true): 0xB0144F
-        case (.blue, false): 0x6FA8FF
-        case (.blue, true): 0x2350E6
+        case (.blue, false): 0x72AAFF
+        case (.blue, true): 0x214EE6
         case (.orange, false): 0xFF8A4C
-        case (.orange, true): 0xB04400
+        case (.orange, true): 0xA33F00
         }
         return Color(hex: hex)
     }
@@ -158,7 +160,10 @@ enum Palette {
         }
     }
 
-    static func danger(_ mode: ThemeMode) -> Color { mode == .light ? Color(hex: 0xC62828) : Color(hex: 0xFF6B5E) }
+    /// Text and icons placed on an accent fill.
+    static func onAccent(_ mode: ThemeMode) -> Color { mode == .light ? .white : Color(hex: 0x0A0C0F) }
+
+    static func danger(_ mode: ThemeMode) -> Color { mode == .light ? Color(hex: 0xB52525) : Color(hex: 0xFF8278) }
     static func warning(_ mode: ThemeMode) -> Color { AccentPreset.amber.color(for: mode) }
 
     static func color(for status: ServerStatus, mode: ThemeMode, accent: Color) -> Color {

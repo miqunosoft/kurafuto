@@ -46,7 +46,7 @@ enum Theme {
     static var storage: Color { Appearance.shared.color(for: .storage) }
 
     /// Text and icons placed on an accent fill.
-    static var onAccent: Color { mode == .light ? .white : Color(hex: 0x0A0C0F) }
+    static var onAccent: Color { Palette.onAccent(mode) }
 
     static var danger: Color { Palette.danger(mode) }
     static var warning: Color { Palette.warning(mode) }
@@ -117,6 +117,22 @@ struct SectionLabel: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 4)
             .accessibilityAddTraits(.isHeader)
+    }
+}
+
+/// A row that turns into a column at the accessibility text sizes, so long text gets the full width
+/// instead of wrapping letter by letter next to its neighbours.
+struct AdaptiveStack<Content: View>: View {
+    var alignment: VerticalAlignment = .center
+    var spacing: CGFloat?
+    @ViewBuilder let content: Content
+    @Environment(\.dynamicTypeSize) private var typeSize
+
+    var body: some View {
+        let layout = typeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: spacing))
+            : AnyLayout(HStackLayout(alignment: alignment, spacing: spacing))
+        layout { content }
     }
 }
 
@@ -225,13 +241,15 @@ struct GaugeTile: View {
     let color: Color
     var caption: String?
     var delay: Double = 0
+    /// Grows with the percentage inside, so large text still fits the ring.
+    @ScaledMetric(relativeTo: .subheadline) private var ringSize: CGFloat = 64
 
     var body: some View {
         let title = String(localized: title)
         let percent = (min(max(value, 0), 100) / 100).formatted(.percent.precision(.fractionLength(0)))
         VStack(spacing: 8) {
             RingGauge(value: value, color: color, delay: delay)
-                .frame(width: 64, height: 64)
+                .frame(width: ringSize, height: ringSize)
             Text(caption.map { "\(title) \($0)" } ?? title)
                 .font(.mono(.caption2))
                 .foregroundStyle(Theme.secondaryText)

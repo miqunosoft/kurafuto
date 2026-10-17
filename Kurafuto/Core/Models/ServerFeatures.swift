@@ -158,6 +158,21 @@ struct BackupConfig: Identifiable, Decodable, Hashable {
             $0.isDefault != $1.isDefault ? $0.isDefault : $0.name.localizedStandardCompare($1.name) == .orderedAscending
         }
     }
+
+    /// Reads `status` of `GET …/backups/backup/{id}`: a JSON string, `{"status": "Failed", "message": "…"}` after a
+    /// failed run and `"Standby"` otherwise. Nil when it cannot be read.
+    static func lastRunFailed(status: String) -> Bool? {
+        struct Status: Decodable { let status: String }
+        return (try? JSONDecoder().decode(Status.self, from: Data(status.utf8))).map { $0.status == "Failed" }
+    }
+}
+
+/// What the panel reports about a running backup.
+enum BackupProgress: Equatable, Sendable {
+    /// Share of the server folder that is archived, 0...1.
+    case running(Double)
+    /// Nil when the panel's result could not be read.
+    case finished(failed: Bool?)
 }
 
 /// Body for `POST …/backups` and `PATCH …/backups/backup/{id}`, validated with `additionalProperties: false`.

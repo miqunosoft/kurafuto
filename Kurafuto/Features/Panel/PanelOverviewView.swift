@@ -3,6 +3,7 @@ import SwiftUI
 /// Host overview: CPU/RAM/disk of the machine, panel version, announcements from the panel.
 struct PanelOverviewView: View {
     @Environment(AppState.self) private var app
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var host: Loadable<HostStats> = .idle
     @State private var news: [Announcement] = []
     @State private var actionError: Error?
@@ -32,7 +33,7 @@ struct PanelOverviewView: View {
     private func hostSection(_ h: HostStats) -> some View {
         VStack(spacing: 10) {
             SectionLabel("Host")
-            HStack(spacing: 10) {
+            AdaptiveStack(spacing: 10) {
                 GaugeTile(title: "CPU", value: h.cpuPercent, color: Theme.cpu, delay: 0.2)
                 GaugeTile(title: "RAM", value: h.memPercent, color: Theme.ram, delay: 0.3)
                 ValueTile(title: "Panel", value: h.craftyVersion)
@@ -43,7 +44,7 @@ struct PanelOverviewView: View {
                 VStack(spacing: 14) {
                     ForEach(h.diskUsage) { d in
                         VStack(alignment: .leading, spacing: 8) {
-                            HStack {
+                            AdaptiveStack {
                                 Label(d.mount, systemImage: "internaldrive").font(.mono(.footnote, weight: .medium))
                                     .foregroundStyle(.primary)
                                 Spacer()
@@ -91,7 +92,7 @@ struct PanelOverviewView: View {
                     .accessibilityLabel("Dismiss \(n.title)")
                 }
                 .card()
-                .transition(.scale(scale: 0.95).combined(with: .opacity))
+                .transition(reduceMotion ? .opacity : .scale(scale: 0.95).combined(with: .opacity))
             }
         }
     }

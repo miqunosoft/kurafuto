@@ -10,6 +10,7 @@ struct KurafutoWidgets: WidgetBundle {
         PlayersWidget()
         BackupWidget()
         PanelWidget()
+        ServerActivityWidget()
     }
 }
 

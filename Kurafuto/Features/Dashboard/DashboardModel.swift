@@ -168,24 +168,30 @@ final class DashboardModel {
 
     // MARK: Actions
 
-    func perform(_ action: ServerAction, on server: Server) async {
-        guard let service else { return }
+    /// True when the panel accepted the action.
+    @discardableResult
+    func perform(_ action: ServerAction, on server: Server) async -> Bool {
+        guard let service else { return false }
         busy = (server.id, action)
         defer { busy = nil }
+        let accepted: Bool
         do {
             try await service.send(action, serverID: server.id)
             UINotificationFeedbackGenerator().notificationOccurred(.success)
+            accepted = true
         } catch CraftyError.eulaRequired {
             eulaServer = server
-            return
+            return false
         } catch {
             UINotificationFeedbackGenerator().notificationOccurred(.error)
             actionError = error
+            accepted = false
         }
         if let value = try? await service.stats(serverID: server.id) {
             stats[server.id] = value
             appendSample(value, to: server.id)
         }
+        return accepted
     }
 
     func isBusy(_ server: Server) -> Bool { busy?.serverID == server.id }
