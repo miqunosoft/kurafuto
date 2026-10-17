@@ -6,7 +6,7 @@ All app sources. XcodeGen picks up new files through the folder glob in `project
 
 | Folder | Owns |
 |---|---|
-| `App/` | `KurafutoApp`, `AppState` (active panel + service + panel rights + app lock), `RootView` (incl. app-switcher privacy cover, lock screen and `kurafuto://` links), tabs; `AppLock` (Face ID / passcode via LocalAuthentication), `.destructiveConfirmation`; `WidgetSync` (writes the widget snapshot) |
+| `App/` | `KurafutoApp`, `AppState` (active panel + service + panel rights + app lock), `RootView` (incl. `kurafuto://` links), tabs; `Shield`/`ShieldWindow` (lock screen and app-switcher cover in a window above the app's, so they also cover sheets); `AppLock` (Face ID / passcode via LocalAuthentication), `.destructiveConfirmation`; `WidgetSync` (writes the widget snapshot) |
 | `Core/Models/` | `Codable` models that mirror Crafty's `openapi-spec.yml` (snake_case `CodingKeys`). Tolerant decoding for Crafty's string-typed numbers |
 | `Core/Networking/` | `APIClient`: bearer auth, `{status,data}` envelope (`requestUnwrapped` for routes without it), console WebSocket (`token` cookie), ephemeral `URLSession`, certificate pinning delegate |
 | `Core/Services/` | `CraftyService` protocol, `LiveCraftyService` (real API, ✅/⚠️ markers), `CraftyConsoleFeed` (WebSocket and `/logs` parsing), `MockCraftyService` + `MockData` |

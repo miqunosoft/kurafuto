@@ -135,6 +135,7 @@ extension AppState {
 struct RootView: View {
     @Environment(AppState.self) private var app
     @Environment(\.scenePhase) private var scenePhase
+    @State private var shieldWindow = ShieldWindow()
 
     var body: some View {
         Group {
@@ -145,7 +146,6 @@ struct RootView: View {
             }
         }
         .accessibilityHidden(app.lock.isLocked)
-        .overlay { if app.lock.isLocked { LockView() } }
         .sheet(isPresented: Binding(get: { app.sessionExpired && !app.lock.isLocked && !app.isMock },
                                     set: { app.sessionExpired = $0 })) {
             SignInAgainView()
@@ -161,15 +161,8 @@ struct RootView: View {
         }
         .tint(Theme.accent)
         .preferredColorScheme(Appearance.shared.mode.colorScheme)
-        // Hides panel addresses, IPs and console output from the app switcher snapshot.
-        .overlay {
-            if scenePhase != .active {
-                ZStack {
-                    Rectangle().fill(Theme.background)
-                    Image(systemName: "cube.transparent.fill").font(.system(size: 56)).foregroundStyle(Theme.accent)
-                }
-                .ignoresSafeArea()
-            }
+        .onChange(of: Shield.current(phase: scenePhase, isLocked: app.lock.isLocked), initial: true) { _, shield in
+            shieldWindow.show(shield, app: app)
         }
         // Lock on .background only: the Face ID prompt itself makes the scene .inactive.
         .onChange(of: scenePhase) { _, phase in

@@ -127,6 +127,31 @@ final class AppLockTests: XCTestCase {
         XCTAssertFalse(lock.isLocked)
     }
 
+    func testShieldCoversWhileInactiveAndLocksWhileLocked() {
+        XCTAssertEqual(Shield.current(phase: .inactive, isLocked: false), .cover)
+        XCTAssertEqual(Shield.current(phase: .background, isLocked: true), .cover)
+        XCTAssertEqual(Shield.current(phase: .active, isLocked: true), .lock)
+        XCTAssertNil(Shield.current(phase: .active, isLocked: false))
+    }
+
+    /// Sheets and alerts are presented inside the app's window, so the shield needs a window above it.
+    func testShieldWindowSitsAboveTheAppAndGoesAway() throws {
+        let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first)
+        let shieldLevel = UIWindow.Level.alert + 1
+        func shields() -> [UIWindow] { scene.windows.filter { !$0.isHidden && $0.windowLevel == shieldLevel } }
+        let window = ShieldWindow()
+
+        window.show(.lock, app: AppState.preview)
+        XCTAssertEqual(shields().count, 1)
+        XCTAssertTrue(scene.windows.filter { $0 !== shields().first }.allSatisfy { $0.windowLevel < shieldLevel })
+
+        window.show(.cover, app: AppState.preview)
+        XCTAssertEqual(shields().count, 1)
+
+        window.show(nil, app: AppState.preview)
+        XCTAssertTrue(shields().isEmpty)
+    }
+
     func testPreviewLockIsOffAndNotPersisted() {
         XCTAssertFalse(AppState.preview.lock.isEnabled)
         XCTAssertFalse(AppState.preview.lock.isLocked)

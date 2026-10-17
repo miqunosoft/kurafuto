@@ -46,7 +46,7 @@ Kurafuto has no server, no analytics and no third-party network calls. See `PRIV
 
 ## App lock
 
-`AppState.lock` (`AppLock`) wraps LocalAuthentication's `deviceOwnerAuthentication`, so Face ID or Touch ID falls back to the device passcode. When the lock is on, `RootView` covers the app with `LockView` at launch and after the scene went to the background (not on `.inactive`, which the Face ID prompt itself triggers). Destructive actions go through `.destructiveConfirmation` or `lock.authorize(_:)`. iOS answers only yes or no; no biometric data reaches the app.
+`AppState.lock` (`AppLock`) wraps LocalAuthentication's `deviceOwnerAuthentication`, so Face ID or Touch ID falls back to the device passcode. When the lock is on, `RootView` covers the app with `LockView` at launch and after the scene went to the background (not on `.inactive`, which the Face ID prompt itself triggers). The lock screen and the app-switcher cover live in a window of their own above the app's (`ShieldWindow`), because iOS presents sheets, alerts and dialogs above the app's root view. Destructive actions go through `.destructiveConfirmation` or `lock.authorize(_:)`. iOS answers only yes or no; no biometric data reaches the app.
 
 ## Widgets
 
