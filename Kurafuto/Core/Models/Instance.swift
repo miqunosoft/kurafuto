@@ -14,3 +14,14 @@ struct Instance: Identifiable, Codable, Hashable {
 
     enum AuthMethod: String, Codable { case password, apiToken }
 }
+
+extension Instance {
+    /// The address as typed, if Kurafuto may connect to it: `https` with a host and nothing else around it.
+    /// Plain `http` is refused, so passwords and tokens never travel unencrypted (ADR 0004).
+    static func panelURL(from text: String) -> URL? {
+        guard let url = URL(string: text.trimmingCharacters(in: .whitespacesAndNewlines)),
+              url.scheme?.lowercased() == "https", let host = url.host(), !host.isEmpty,
+              url.user() == nil, url.password() == nil, url.query() == nil, url.fragment() == nil else { return nil }
+        return url
+    }
+}

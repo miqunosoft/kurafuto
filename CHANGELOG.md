@@ -39,4 +39,5 @@ All notable user-facing changes to Kurafuto are documented here. The format is b
 - Siri and Shortcuts: start a server, stop it (after a confirmation; with the app lock on, Kurafuto opens and asks for Face ID) and ask how many players are online, also in German, Japanese and Chinese ("Start Survival SMP in Kurafuto"). The actions need an unlocked iPhone and use your active panel.
 - Settings now show the app's real version number.
 - Servers tab: the "No data yet" note on an empty CPU or RAM chart is now centered in the chart itself instead of running into the axis labels.
+- Security: panels are added and reached over HTTPS only. Before, an `http://` address was accepted and your password or token could have been sent unencrypted; the welcome screen now explains why such an address can't be used.
 - Works with Crafty Controller 4.7 and later; sign-in, servers, live values, start/stop/restart, console, logs, schedules, backups, files, webhooks, server configuration, users and roles are verified against real panels.

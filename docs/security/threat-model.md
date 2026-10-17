@@ -1,6 +1,6 @@
 # Threat model
 
-- Last reviewed: 2026-10-15 (0.4 widgets, Siri and Shortcuts)
+- Last reviewed: 2026-10-17 (HTTPS-only panel addresses)
 - Update this document in the same pull request whenever a trust boundary, data category, network peer or stored secret changes.
 
 ## System today
@@ -43,9 +43,9 @@ An iOS app with no backend. The user adds one or more Crafty Controller panels (
 
 | Threat | Boundary | Mitigation | Status |
 |---|---|---|---|
-| Token or password interception | B1 | HTTPS only; App Transport Security stays on; no `NSAllowsArbitraryLoads`/`NSAllowsLocalNetworking`; ephemeral `URLSession` (no cookie/cache persistence) | Implemented |
+| Token or password interception | B1 | HTTPS only, enforced when a panel is added (`Instance.panelURL`) and again in `APIClient` before anything is sent, the console WebSocket always `wss`; App Transport Security stays on; no `NSAllowsArbitraryLoads`/`NSAllowsLocalNetworking`; ephemeral `URLSession` (no cookie/cache persistence) | Implemented |
 | MITM with a forged certificate on a self-signed panel | B1 | Self-signed certificates are rejected unless their SHA-256 fingerprint was explicitly confirmed by the user and pinned per panel (ADR 0004) | Implemented; UI to review/reset pins in 0.2 |
-| Token leak through the console WebSocket | B1 | Same host and pinned, ephemeral session as the API; token only in the `Cookie` header, never in the URL; `wss` for `https` panels | Implemented |
+| Token leak through the console WebSocket | B1 | Same host and pinned, ephemeral session as the API; token only in the `Cookie` header, never in the URL; always `wss` | Implemented |
 | XSS/markup injection via MOTD, chat, logs, file contents | B2 | All panel strings rendered as plain `Text`; WebSocket console lines are stripped of tags and unescaped into plain text (`CraftyConsoleFeed`), unknown events ignored, console capped at 1,000 lines; Minecraft formatting codes stripped; no `WKWebView`, no HTML/Markdown rendering | Implemented |
 | Path traversal via file names from the panel | B2 | Paths come only from panel listings, and listing entries are kept only when they are a single name directly inside the listed folder; new folder names must be a single name without `/`, `\`, `.`/`..` or control characters (`ServerPath.isValidName`) and are checked again in the service; `files/copy`/`move` (traversal in 4.7.0) are not used. Uploads go only into a folder from the listing, under a single ASCII name, at most 500 MB, after confirmation when they would replace a file. Backup archives: only names of the panel's own `yyyy-MM-dd_HH-mm-ss.zip` shape are accepted and only the name is sent back; backup config ids must match the panel's `[a-z0-9-]+` route pattern before they go into a URL | Implemented |
 | Hostile or malformed JSON | B2 | `Codable` with lenient, bounded decoding; decoding errors surface as errors, no crashes; no force unwraps outside tests | Implemented |

@@ -4738,6 +4738,28 @@
         }
       }
     },
+    "Kurafuto connects only over HTTPS, so your password and token stay encrypted. Crafty serves HTTPS on port 8443 by default." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kurafuto verbindet sich nur über HTTPS, damit dein Passwort und dein Token verschlüsselt bleiben. Crafty nutzt standardmäßig HTTPS auf Port 8443."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "パスワードとトークンを暗号化したまま送るため、Kurafuto は HTTPS でのみ接続します。Crafty は標準でポート 8443 の HTTPS を使います。"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kurafuto 只通过 HTTPS 连接，以确保你的密码和令牌始终加密。Crafty 默认在 8443 端口提供 HTTPS。"
+          }
+        }
+      }
+    },
     "Kurafuto could not confirm it's you. Open Kurafuto to stop the server." : {
       "localizations" : {
         "de" : {

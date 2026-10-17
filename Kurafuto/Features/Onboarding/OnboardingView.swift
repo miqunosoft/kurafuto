@@ -34,10 +34,16 @@ struct OnboardingView: View {
                 .listRowBackground(Color.clear)
 
                 Group {
-                    Section("Panel") {
+                    Section {
                         TextField("Name", text: $name)
                         TextField("Address, e.g. https://192.168.1.20:8443", text: $address)
                             .keyboardType(.URL).textInputAutocapitalization(.never).autocorrectionDisabled()
+                    } header: {
+                        Text("Panel")
+                    } footer: {
+                        if address.lowercased().hasPrefix("http://") {
+                            Text("Kurafuto connects only over HTTPS, so your password and token stay encrypted. Crafty serves HTTPS on port 8443 by default.")
+                        }
                     }
 
                     Section {
@@ -72,7 +78,7 @@ struct OnboardingView: View {
                             if busy { ProgressView().tint(Theme.onAccent) } else { Text("Connect") }
                         }
                         .buttonStyle(InstrumentButtonStyle())
-                        .disabled(busy || URL(string: address)?.host == nil)
+                        .disabled(busy || Instance.panelURL(from: address) == nil)
 
                         Button("Try the Demo with Sample Data") { app.startDemo() }
                             .buttonStyle(InstrumentButtonStyle(kind: .outline))
@@ -95,7 +101,7 @@ struct OnboardingView: View {
 
     private func connect(trusting sha: String? = nil) async {
         certToTrust = nil
-        guard let url = URL(string: address.trimmingCharacters(in: .whitespaces)) else { return }
+        guard let url = Instance.panelURL(from: address) else { return }
         busy = true; error = nil
         defer { busy = false }
 

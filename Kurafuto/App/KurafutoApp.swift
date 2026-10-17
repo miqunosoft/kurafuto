@@ -88,7 +88,7 @@ final class AppState {
     func webPanelURL(serverID: String, subpage: String) -> URL? {
         guard let base = activeInstance?.baseURL,
               var comps = URLComponents(url: base.appending(path: "/panel/server_detail"), resolvingAgainstBaseURL: false),
-              ["https", "http"].contains(comps.scheme) else { return nil }
+              comps.scheme?.lowercased() == "https" else { return nil }
         comps.queryItems = [URLQueryItem(name: "id", value: serverID), URLQueryItem(name: "subpage", value: subpage)]
         return comps.url
     }
