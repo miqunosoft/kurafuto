@@ -1,6 +1,6 @@
 # Privacy Policy
 
-_Last updated: 2026-10-15_
+_Last updated: 2026-10-17_
 
 **Short version: Kurafuto collects nothing. We do not have a server, and we never see your data.**
 
@@ -29,7 +29,7 @@ Face ID, Touch ID and your passcode are checked by iOS; Kurafuto only learns whe
 
 Your password is never stored; it is only used once to obtain a token from your panel. Server data, logs and files are shown while you look at them and are not saved by Kurafuto, except the short widget summary above. Widgets never contact your panel, and they never show the panel address or your username. Player names appear only on Home Screen widgets and are hidden while your iPhone is locked; Lock Screen widgets show only numbers. If the Face ID lock is on, iOS hides all widget content while your iPhone is locked.
 
-You can remove everything by signing out of a panel in Settings or by deleting the app. Signing out or switching panels also clears the widget summary.
+Signing out of a panel in Settings removes its token and its entry in the panel list; signing out or switching panels also clears the widget summary. Deleting the app removes everything else. iOS keeps Keychain entries after an app is deleted, so if you delete Kurafuto without signing out first, its tokens stay on this device – unreadable for other apps and not part of any backup – until you install Kurafuto again, which deletes them when it first starts. To remove them right away, sign out of each panel before deleting the app.
 
 ## Siri and Shortcuts
 

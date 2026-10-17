@@ -1,6 +1,6 @@
 # Threat model
 
-- Last reviewed: 2026-10-15 (0.4 widgets, Siri and Shortcuts)
+- Last reviewed: 2026-10-17 (tokens left after deleting the app)
 - Update this document in the same pull request whenever a trust boundary, data category, network peer or stored secret changes.
 
 ## System today
@@ -51,7 +51,7 @@ An iOS app with no backend. The user adds one or more Crafty Controller panels (
 | Hostile or malformed JSON | B2 | `Codable` with lenient, bounded decoding; decoding errors surface as errors, no crashes; no force unwraps outside tests | Implemented |
 | Webhook address leaks or misuse | B2, B4 | Webhook URLs usually embed a secret token. The panel, not the app, connects to them, so plain `http://` targets add no network peer to the app; the list shows only the host, the full address only in the editor; addresses are never logged. Scheme, host and port are validated like Crafty 4.11 before saving | Implemented |
 | Passwords set for other panel users | B1, B4 | Typed into a secure field, sent once in the request body to the user's own panel over the pinned session, never stored or logged; an empty field keeps the current password. Deleting users and roles needs confirmation | Implemented |
-| Token theft from device storage or backups | B3 | Keychain, `AfterFirstUnlockThisDeviceOnly` (excluded from backups and other devices); passwords never stored | Implemented |
+| Token theft from device storage or backups | B3 | Keychain, `AfterFirstUnlockThisDeviceOnly` (excluded from backups and other devices); passwords never stored. iOS keeps Keychain items after the app is deleted; the first launch of a new install deletes tokens left by an earlier one (`InstanceStore.forgetEarlierInstall`) | Implemented |
 | Panel list readable via Files app | B3 | Stored in Application Support with complete file protection, not Documents | Implemented |
 | Secrets in logs | B3 | No logging of tokens, passwords, URLs or console output | Rule in `AGENTS.md` |
 | App-switcher snapshot leaks panel data | B4 | Privacy cover whenever the scene is not active | Implemented |

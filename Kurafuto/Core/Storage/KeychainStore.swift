@@ -27,6 +27,12 @@ enum KeychainStore {
         return String(data: d, encoding: .utf8)
     }
 
+    /// Every token of this app.
+    static func deleteAll() {
+        let q: [String: Any] = [kSecClass as String: kSecClassGenericPassword, kSecAttrService as String: service]
+        SecItemDelete(q as CFDictionary)
+    }
+
     static func delete(_ key: String) {
         let q: [String: Any] = [kSecClass as String: kSecClassGenericPassword,
                                 kSecAttrService as String: service,
@@ -44,10 +50,23 @@ final class InstanceStore {
 
     init(preview: [Instance]? = nil) {
         if let preview { instances = preview; return }
+        Self.forgetEarlierInstall(listExists: FileManager.default.fileExists(atPath: url.path()), defaults: .standard,
+                                  deleteTokens: KeychainStore.deleteAll)
         if let d = try? Data(contentsOf: url), let list = try? JSONDecoder().decode([Instance].self, from: d) {
             instances = list
         }
     }
+
+    /// iOS keeps Keychain items when the app is deleted, but removes its files and settings. On the first launch of
+    /// a new install, tokens from an earlier one are deleted. A panel list on disk means this install already ran
+    /// (its settings may just be unreadable before the first unlock), so nothing is deleted then.
+    static func forgetEarlierInstall(listExists: Bool, defaults: UserDefaults, deleteTokens: () -> Void) {
+        guard !defaults.bool(forKey: installedKey) else { return }
+        if !listExists { deleteTokens() }
+        defaults.set(true, forKey: installedKey)
+    }
+
+    static let installedKey = "installed"
 
     func upsert(_ instance: Instance, token: String) {
         if let i = instances.firstIndex(where: { $0.id == instance.id }) { instances[i] = instance }

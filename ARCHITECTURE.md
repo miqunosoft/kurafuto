@@ -27,7 +27,7 @@ Kurafuto is a single-target SwiftUI app with no backend of its own and no third-
 
 | Data | Where it lives | Leaves the device? |
 |---|---|---|
-| Panel token / API key | Keychain, `AfterFirstUnlockThisDeviceOnly` | Only to that panel, in the `Authorization` header |
+| Panel token / API key | Keychain, `AfterFirstUnlockThisDeviceOnly`; iOS keeps it after the app is deleted, and a new install deletes it on first launch | Only to that panel, in the `Authorization` header |
 | Password, 2FA code | Memory during sign-in only | Only to that panel's login endpoint |
 | Panel list (name, URL, username, pinned cert hash) | `Application Support/instances.json`, complete file protection | Never (part of the user's own device backup) |
 | App preferences (Face ID toggle, refresh interval) | `UserDefaults` | Never |
