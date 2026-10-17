@@ -182,7 +182,7 @@ private struct AccentPicker: View {
 }
 
 enum AppLinks {
-    static let sourceCode = URL(string: "https://github.com/miqunosoft/kurafuto") ?? URL(filePath: "/")
+    static let sourceCode = URL(string: "https://github.com/miquno/kurafuto") ?? URL(filePath: "/")
     static let privacyPolicy = URL(string: "https://getkurafuto.app/privacy/") ?? URL(filePath: "/")
     static let website = URL(string: "https://getkurafuto.app") ?? URL(filePath: "/")
 }

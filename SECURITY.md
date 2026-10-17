@@ -12,7 +12,7 @@ Only the latest App Store / TestFlight build and the `main` branch receive secur
 
 Report them privately through GitHub's private vulnerability reporting:
 
-1. Open the [Security Advisories page](https://github.com/miqunosoft/kurafuto/security/advisories/new).
+1. Open the [Security Advisories page](https://github.com/miquno/kurafuto/security/advisories/new).
 2. Click **Report a vulnerability** and fill in the details.
 
 Please include as much of the following as you can:

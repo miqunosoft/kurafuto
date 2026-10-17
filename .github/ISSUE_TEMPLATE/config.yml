@@ -2,5 +2,5 @@
 blank_issues_enabled: false
 contact_links:
   - name: Report a security vulnerability
-    url: https://github.com/miqunosoft/kurafuto/security/advisories/new
+    url: https://github.com/miquno/kurafuto/security/advisories/new
     about: Please report security issues privately.

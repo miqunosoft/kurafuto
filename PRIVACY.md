@@ -55,4 +55,4 @@ Changes to this policy are published at https://getkurafuto.app/privacy/ and in 
 
 ## Contact
 
-Questions about privacy: support@getkurafuto.app or an issue at https://github.com/miqunosoft/kurafuto/issues. For security issues, see [SECURITY.md](SECURITY.md).
+Questions about privacy: support@getkurafuto.app or an issue at https://github.com/miquno/kurafuto/issues. For security issues, see [SECURITY.md](SECURITY.md).
